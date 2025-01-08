@@ -121,4 +121,39 @@ Rsubread::align(index = "~/bulk-rnaseq-gallagher/reference_data/gapped_rsubread_
 
 ```
 
+#   mapping/aligning automation
+    [DOES THIS WORK? UPDATE LATER]
+```{r}
+align_filenames <- read.table("/home/willettb/bulk-rnaseq-gallagher/align_samples.txt",sep=" ",header=FALSE)
+
+for (x in 1:12) {
+file_input_1 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/", align_filenames[x,1], sep = "")
+file_input_2 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/", align_filenames[x,2], sep = "")
+align_output <- paste("/home/willettb/bulk-rnaseq-gallagher/bam_files/", align_filenames[x,3], sep = "")
+
+print(file_input_1)
+print(file_input_2)
+print(align_output)
+
+Rsubread::align(index = "~/bulk-rnaseq-gallagher/reference_data/gapped_rsubread_index", readfile1 = file_input_1, readfile2 = file_input_2, output_file = align_output, sortReadsByCoordinates = TRUE, type = "rna", useAnnotation = TRUE, annot.ext = "~/bulk-rnaseq-gallagher/reference_data/mm10.refGene.gtf", isGTF = TRUE, GTF.featureType = "exon", GTF.attrType = "gene_id")
+
+}
+
+```
+
+#   Read quantification
+```{r}
+counts_data <- Rsubread::featureCounts(files = list.files(path = "~/data/bulk_RNA_seq/bam_files", pattern = "bam$", full.names = TRUE), annot.ext = "~/bulk-rnaseq-gallagher/reference_data/mm10.refGene.gtf", isGTFAnnotationFile = TRUE, GTF.featureType = "exon", countMultiMappingReads = TRUE, strandSpecific = 0, isPairedEnd = TRUE)
+
+```
+
+
+
+#   Read quantification
+```{r}
+
+
+```
+
+
 

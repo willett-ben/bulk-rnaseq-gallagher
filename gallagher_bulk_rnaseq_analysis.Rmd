@@ -28,3 +28,97 @@ system(command = 'multiqc /home/willettb/bulk-rnaseq-gallagher/fastq_raw_qc --fi
 
 ```
 
+#trimming - automated, but with a R-to-terminal problem
+```{r}
+#worked. but only one two files (one sample) Would like to automate this...
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/0_min_unstimulated_rep1_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/0_min_unstimulated_rep1_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/0_min_unstimulated_rep1_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/0_min_unstimulated_rep1_2.fastq.gz')
+
+
+#automating - I'm able to get all of the file names constructed correctly through this so they can be fed into cutadapt
+#PROBLEM: running cutadapt through the command line doesn't let me use the R variables. Not sure how to export them
+samples <- read.table("/home/willettb/bulk-rnaseq-gallagher/samples.txt",sep=" ",header=FALSE)
+
+for (x in 1:3) {
+file_output_1 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/", samples[1,1],"_trimmed.fastq.gz", sep = "")
+file_input_1 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_raw/", samples[1,1], ".fastq.gz", sep = "")
+print(file_output_1)
+print(file_input_1)
+file_output_2 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/", samples[1,2],"_trimmed.fastq.gz", sep = "")
+file_input_2 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_raw/", samples[1,2], ".fastq.gz", sep = "")
+print(file_output_2)
+print(file_input_2)
+}
+
+#theoretically would include this in the for loop
+#for (x in 1:1) {
+#file_output_1 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/", samples[1,1],"_trimmed.fastq.gz", sep = "")
+#file_input_1 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_raw/", samples[1,1], ".fastq.gz", sep = "")
+
+#file_output_2 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/", samples[1,2],"_trimmed.fastq.gz", sep = "")
+#file_input_2 <- paste("/home/willettb/bulk-rnaseq-gallagher/fastq_raw/", samples[1,2], ".fastq.gz", sep = "")
+#system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o file_output_1 -p file_output_2 file_input_1 file_input_2')
+
+
+```
+
+
+#   Brute force cutadapt to get through it
+    Obviously would prefer to use an automated way
+```{r}
+#brute forcing the samples to get it done
+
+#unstimulated 0 minutes
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/0_min_unstimulated_rep2_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/0_min_unstimulated_rep2_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/0_min_unstimulated_rep2_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/0_min_unstimulated_rep2_2.fastq.gz')
+
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/0_min_unstimulated_rep3_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/0_min_unstimulated_rep3_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/0_min_unstimulated_rep3_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/0_min_unstimulated_rep3_2.fastq.gz')
+
+#siinfekl
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_rep1_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_rep1_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_rep1_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_rep1_2.fastq.gz')
+
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_rep2_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_rep2_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_rep2_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_rep2_2.fastq.gz')
+
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_rep3_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_rep3_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_rep3_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_rep3_2.fastq.gz')
+
+#siinfekl + drug
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_PRN-694_rep1_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_PRN-694_rep1_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_PRN-694_rep1_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_PRN-694_rep1_2.fastq.gz')
+
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_PRN-694_rep2_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_PRN-694_rep2_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_PRN-694_rep2_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_PRN-694_rep2_2.fastq.gz')
+
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_PRN-694_rep3_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_N4_peptide_PRN-694_rep3_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_PRN-694_rep3_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_N4_peptide_PRN-694_rep3_2.fastq.gz')
+
+#30 unstimulated
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_unstimulated_rep1_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_unstimulated_rep1_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_unstimulated_rep1_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_unstimulated_rep1_2.fastq.gz')
+
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_unstimulated_rep2_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_unstimulated_rep2_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_unstimulated_rep2_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_unstimulated_rep2_2.fastq.gz')
+
+system(command = 'cutadapt -a AGATCGGAAGAG -A AGATCGGAAGAG -q 20 -m 10 --pair-filter=any -o /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_unstimulated_rep3_1_trimmed.fastq.gz -p /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed/30_min_unstimulated_rep3_2_trimmed.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_unstimulated_rep3_1.fastq.gz /home/willettb/bulk-rnaseq-gallagher/fastq_raw/30_min_unstimulated_rep3_2.fastq.gz')
+
+
+#run fastqc on the trimmed fastq files
+fastqcr::fastqc(fq.dir = "/home/willettb/bulk-rnaseq-gallagher/fastq_trimmed",
+                qc.dir = "/home/willettb/bulk-rnaseq-gallagher/fastq_trimmed_qc",
+                threads = 1,
+                fastqc.path = "~/software/FastQC/fastqc")
+
+#multiqc to check qc data
+system(command = 'multiqc /home/willettb/bulk-rnaseq-gallagher/fastq_trimmed_qc --filename multiqc_trimmed.fastqc.html --outdir /home/willettb/bulk-rnaseq-gallagher')
+
+
+```
+
+
+#   Build index from mm10 reference genome
+```{r}
+Rsubread::buildindex(basename = "~/bulk-rnaseq-gallagher/reference_data/gapped_rsubread_index", reference = "~/bulk-rnaseq-gallagher/reference_data/mm10.fa", gappedIndex = TRUE, memory = 8000)
+
+```
+
+
+#   mapping/aligning
+    took ~50 minutes to finish one sample. will set up automating code to run overnight
+```{r}
+Rsubread::align(index = "~/bulk-rnaseq-gallagher/reference_data/gapped_rsubread_index", readfile1 = "~/bulk-rnaseq-gallagher/fastq_trimmed/0_min_unstimulated_rep1_1_trimmed.fastq.gz", readfile2 = "~/bulk-rnaseq-gallagher/fastq_trimmed/0_min_unstimulated_rep1_2_trimmed.fastq.gz", output_file = "~/bulk-rnaseq-gallagher/bam_files/0_min_unstimulated_rep1_sorted_bam", sortReadsByCoordinates = TRUE, type = "rna", useAnnotation = TRUE, annot.ext = "~/bulk-rnaseq-gallagher/reference_data/mm10.refGene.gtf", isGTF = TRUE, GTF.featureType = "exon", GTF.attrType = "gene_id")
+
+```
+
+

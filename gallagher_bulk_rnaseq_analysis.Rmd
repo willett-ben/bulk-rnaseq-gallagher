@@ -145,8 +145,78 @@ Rsubread::align(index = "~/bulk-rnaseq-gallagher/reference_data/gapped_rsubread_
 ```{r}
 counts_data <- Rsubread::featureCounts(files = list.files(path = "~/data/bulk_RNA_seq/bam_files", pattern = "bam$", full.names = TRUE), annot.ext = "~/bulk-rnaseq-gallagher/reference_data/mm10.refGene.gtf", isGTFAnnotationFile = TRUE, GTF.featureType = "exon", countMultiMappingReads = TRUE, strandSpecific = 0, isPairedEnd = TRUE)
 
+#save(counts_data, file = 'gallagher_quantification_results.rdat')
+
 ```
 
+
+
+#   QC with Picard
+```{r}
+#0min
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=bam_files/0_min_unstimulated_rep1_sorted.bam O=picard/0_min_unstimulated_rep1_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/0_min_unstimulated_rep2_sorted.bam O=picard/0_min_unstimulated_rep2_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/0_min_unstimulated_rep3_sorted.bam O=picard/0_min_unstimulated_rep3_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+#30min unstim
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/0_min_unstimulated_rep1_sorted.bam O=picard/30_min_unstimulated_rep1_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/30_min_unstimulated_rep2_sorted.bam O=picard/30_min_unstimulated_rep2_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/30_min_unstimulated_rep3_sorted.bam O=picard/30_min_unstimulated_rep3_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+#30min siinfekl
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_rep1_sorted.bam O=picard/30_min_N4_peptide_rep1_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_rep2_sorted.bam O=picard/30_min_N4_peptide_rep2_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_rep3_sorted.bam O=picard/30_min_N4_peptide_rep3_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+#30min siinfekl + drug
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_PRN-694_rep1_sorted.bam O=picard/30_min_N4_peptide_PRN-694_rep1_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_PRN-694_rep2_sorted.bam O=picard/30_min_N4_peptide_PRN-694_rep2_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectRnaSeqMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_PRN-694_rep3_sorted.bam O=picard/30_min_N4_peptide_PRN-694_rep3_rna_metrics.txt REF_FLAT=reference_data/mm10.refflat RIBOSOMAL_INTERVALS=reference_data/mm10_primary_ribosomalRNA_interval_list.txt STRAND=NONE')
+
+```
+
+
+#   Size distribution data
+    Not sure how to automate this. Had done things like this on Alpine in the past
+```{r}
+
+#0min
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=bam_files/0_min_unstimulated_rep1_sorted.bam O=picard/0_min_unstimulated_rep1_size_dist.txt H=picard/0_min_unstimulated_rep1_hist.pdf ASSUME_SORTED=true')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/0_min_unstimulated_rep2_sorted.bam O=picard/0_min_unstimulated_rep2_size_dist.txt H=picard/0_min_unstimulated_rep2_hist.pdf ASSUME_SORTED=true')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/0_min_unstimulated_rep3_sorted.bam O=picard/0_min_unstimulated_rep3_size_dist.txt H=picard/0_min_unstimulated_rep3_hist.pdf ASSUME_SORTED=true')
+
+#30min unstim
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_unstimulated_rep1_sorted.bam O=picard/30_min_unstimulated_rep1_size_dist.txt H=picard/30_min_unstimulated_rep1_hist.pdf ASSUME_SORTED=true')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_unstimulated_rep2_sorted.bam O=picard/30_min_unstimulated_rep2_size_dist.txt H=picard/30_min_unstimulated_rep2_hist.pdf ASSUME_SORTED=true')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_unstimulated_rep3_sorted.bam O=picard/30_min_unstimulated_rep3_size_dist.txt H=picard/30_min_unstimulated_rep3_hist.pdf ASSUME_SORTED=true')
+
+#30min siinfekl
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_rep1_sorted.bam O=picard/30_min_N4_peptide_rep1_size_dist.txt H=picard/30_min_N4_peptide_rep1_hist.pdf ASSUME_SORTED=true')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_rep2_sorted.bam O=picard/30_min_N4_peptide_rep2_size_dist.txt H=picard/30_min_N4_peptide_rep2_hist.pdf ASSUME_SORTED=true')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_rep3_sorted.bam O=picard/30_min_N4_peptide_rep3_size_dist.txt H=picard/30_min_N4_peptide_rep3_hist.pdf ASSUME_SORTED=true')
+
+#30min siinfekl + drug
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_PRN-694_rep1_sorted.bam O=picard/30_min_N4_peptide_PRN-694_rep1_size_dist.txt H=picard/30_min_N4_peptide_PRN-694_rep1_hist.pdf ASSUME_SORTED=true')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_PRN-694_rep2_sorted.bam O=picard/30_min_N4_peptide_PRN-694_rep2_size_dist.txt H=picard/30_min_N4_peptide_PRN-694_rep2_hist.pdf ASSUME_SORTED=true')
+
+system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertSizeMetrics I=../data/bulk_RNA_seq/bam_files/30_min_N4_peptide_PRN-694_rep3_sorted.bam O=picard/30_min_N4_peptide_PRN-694_rep3_size_dist.txt H=picard/30_min_N4_peptide_PRN-694_rep3_hist.pdf ASSUME_SORTED=true')
+
+```
 
 
 #   Read quantification
@@ -154,6 +224,4 @@ counts_data <- Rsubread::featureCounts(files = list.files(path = "~/data/bulk_RN
 
 
 ```
-
-
 

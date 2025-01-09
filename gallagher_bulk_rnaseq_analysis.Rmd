@@ -219,9 +219,69 @@ system(command='java -jar ~/software/picard/build/libs/picard.jar CollectInsertS
 ```
 
 
+#   Get info on strandedness
+```{r}
+
+#can automate later..
+#run these in terminal *not* R
+#remember the order though for labeling each line with the group and rep number!
+
+sed -n '7,8p' 0_min_unstimulated_rep1_rna_metrics.txt > summary.txt
+sed -n '7,8p' 0_min_unstimulated_rep2_rna_metrics.txt >> summary.txt
+sed -n '7,8p' 0_min_unstimulated_rep3_rna_metrics.txt >> summary.txt
+
+sed -n '7,8p' 30_min_unstimulated_rep1_rna_metrics.txt >> summary.txt
+sed -n '7,8p' 30_min_unstimulated_rep2_rna_metrics.txt >> summary.txt
+sed -n '7,8p' 30_min_unstimulated_rep3_rna_metrics.txt >> summary.txt
+
+sed -n '7,8p' 30_min_N4_peptide_rep1_rna_metrics.txt >> summary.txt
+sed -n '7,8p' 30_min_N4_peptide_rep2_rna_metrics.txt >> summary.txt
+sed -n '7,8p' 30_min_N4_peptide_rep3_rna_metrics.txt >> summary.txt
+
+sed -n '7,8p' 30_min_N4_peptide_PRN-694_rep1_rna_metrics.txt >> summary.txt
+sed -n '7,8p' 30_min_N4_peptide_PRN-694_rep2_rna_metrics.txt >> summary.txt
+sed -n '7,8p' 30_min_N4_peptide_PRN-694_rep3_rna_metrics.txt >> summary.txt
+
+#data is unstranded
+
+```
+
+
+
+
+#   Create geneCounts matrix and upload metadata
+    make sure each file is formatted properly for analysis
+```{r}
+gallagher_metadata <- read.csv(file = 'gallagher_metadata.csv', header = TRUE, sep = ",")
+rownames(gallagher_metadata)
+rownames(gallagher_metadata) <- gallagher_metadata$sample_id
+rownames(gallagher_metadata)
+
+geneCounts <- counts_data$counts
+all(rownames(gallagher_metadata) == colnames(geneCounts))
+
+colnames(geneCounts)
+#removing "_sorted.bam" from the column names
+colnames(geneCounts) <- stringr::str_remove(string = colnames(geneCounts), pattern = "_sorted.bam")
+colnames(geneCounts)
+
+rownames(gallagher_metadata)
+colnames(geneCounts)
+geneCounts <- geneCounts[,c(1,2,3,10,11,12,7,8,9,4,5,6)]
+rownames(gallagher_metadata)
+all(rownames(gallagher_metadata) == colnames(geneCounts))
+
+all(rownames(gallagher_metadata) %in% colnames(geneCounts))
+all(colnames(geneCounts) %in% rownames(gallagher_metadata))
+
+#metadata row names = geneCounts colnames
+
+```
+
+
+
 #   Read quantification
 ```{r}
 
 
 ```
-

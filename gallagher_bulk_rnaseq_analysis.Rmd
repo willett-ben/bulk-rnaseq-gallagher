@@ -369,10 +369,10 @@ plotPCA(vst_de_obj, intgroup = c("replicate"))
 
 #   Differential gene expression analysis
 ```{r}
-results1 <- DESeq2::results(deObj, contrast = c("biological_group","30_min_N4_PRN-694","30_min_N4"))
-results1
+prn_rel_30min_n4 <- DESeq2::results(deObj, contrast = c("biological_group","30_min_N4_PRN-694","30_min_N4"))
+prn_rel_30min_n4
 
-prn_rel_30_min_n4_df <- as.data.frame(results1)
+prn_rel_30_min_n4_df <- as.data.frame(prn_rel_30min_n4)
 write.csv(x=prn_rel_30_min_n4_df, file="drug_vs_untreated_N4_30min.csv", quote = F, row.names = T)
 ```
 
@@ -383,4 +383,74 @@ write.csv(x=prn_rel_30_min_n4_df, file="drug_vs_untreated_N4_30min.csv", quote =
 #save data objects so we don't need to redo the analysis
 
 save(list = c("gallagher_metadata", "deObj", "geneCounts", "pcs", "normCountsDF"), file = "bulk_rnaseq_exp_gallagher2021.Rdat")
+```
+
+
+
+#   QC for DE analysis
+```{r}
+
+boxplot(log10(assays(deObj)[["cooks"]]), range=0, las=1)
+hist(prn_rel_30min_n4$pvalue)
+
+```
+
+#   volcano plot
+```{r}
+library(ggrepel)
+deResults <- read.csv(file = '30min_n4_prn_vs_30min_n4.csv', header = TRUE, row.names = 1)
+deResults$negLog10FDR <- (-1)*log10(deResults$padj)
+deResults$gene <- rownames(deResults)
+
+ggplot(deResults, aes(x = log2FoldChange, y = negLog10FDR)) + geom_point() + geom_vline(xintercept=c(-1,1), col="darkred") + xlim(-5,5) + geom_hline(yintercept=1, col = "darkred") + theme_minimal() + geom_text_repel(data=subset(deResults, padj <0.05), aes (label = gene), max.overlaps = 15)
+
+```
+
+#   Heatmap
+```{r}
+library(pheatmap)
+sigGenes <- deResults[which(deResults$pad < 0.1), "gene"]
+samplesOfInterest <- c("30_min_N4_peptide_rep1", "30_min_N4_peptide_rep2", "30_min_N4_peptide_rep3", "30_min_N4_peptide_PRN-694_rep1", "30_min_N4_peptide_PRN-694_rep2", "30_min_N4_peptide_PRN-694_rep3")
+
+dataToGraph <- normCountsDF[sigGenes, samplesOfInterest]
+pallette <- colorRampPalette(c("#6aa84f", "white", "#ffff00"))
+
+pheatmap(dataToGraph, show_rownames = TRUE, scale = 'row', cluster_cols = TRUE, cluster_rows = TRUE, angle_col = 45, cellwidth = 25, cellheight = 10, color = pallette(20), display_number = FALSE)
+
+```
+
+#   Overrepresentation analysis
+```{r}
+library(msigdbr)
+library(org.Mm.eg.db)
+library(clusterProfiler)
+
+upGenes <- deResults[which(deResults$padj < 0.05 & deResults$log2FoldChange > 0.25), "gene"]
+downGenes <- deResults[which(deResults$padj < 0.05 & deResults$log2FoldChange < -0.25), "gene"]
+
+msigH_mouse <- msigdbr(species = "Mus musculus", category = "H") %>% dplyr::select(gs_name, gene_symbol)
+
+outputH_up <- enricher(gene = upGenes, TERM2GENE = msigH_mouse)
+outputH_down <- enricher(gene = downGenes, TERM2GENE = msigH_mouse)
+
+hallmark_results_up <- outputH_up@result
+hallmark_results_down <- outputH_down@result
+
+#save outputs and data
+write.table(x = hallmark_results_up, file = "msigHallmark_up.tsv", quote = FALSE, row.names = FALSE, sep = '\t')
+write.table(x = hallmark_results_down, file = "msigHallmark_down.tsv", quote = FALSE, row.names = FALSE, sep = '\t')
+
+save(list = c("outputH_up", "outputH_down"), file = "msigH_results.Rdat")
+
+#visualize
+dotplot(outputH_up, showCategory = 1, x="GeneRatio", color = "p.adjust", title="up")
+dotplot(outputH_down, showCategory = 7, x="GeneRatio", color = "p.adjust", title="down")
+
+#not sure why outputH_up isn't working. Down is though...
+#maybe has something to do with there only being 2 entries in the up dataset??
+
+```
+
+#   save progress
+```{r}
 ```

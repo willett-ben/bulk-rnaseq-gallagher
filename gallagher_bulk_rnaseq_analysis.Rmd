@@ -280,8 +280,107 @@ all(colnames(geneCounts) %in% rownames(gallagher_metadata))
 
 
 
-#   Read quantification
+#   Gene filtering
+    use exact value across all samples. no ratios (n = 15)
 ```{r}
+keep <- rowSums(geneCounts) >= 15
+
+filteredGeneCounts <- geneCounts[keep,]
+dim(filteredGeneCounts)
+
+```
+
+#   Generate DESeq2 object and scaling factors
+```{r}
+deObj <- DESeq2::DESeqDataSetFromMatrix(countData = filteredGeneCounts, colData = gallagher_metadata, design = ~ biological_group)
+
+deObj <- DESeq2::DESeq(deObj)
+
+#dataframe of normalized counts
+normCountsDF <- DESeq2::counts(deObj, normalized = TRUE)
+
+```
 
 
+
+#   PCA
+```{r}
+pcs <- prcomp(t(normCountsDF), scale. = TRUE)
+summary(pcs)
+
+pc_variance_summary <- summary(pcs)
+
+gallagher_metadata <- cbind(pcs$x, gallagher_metadata)
+
+
+#initial plotting of PCs
+library(ggplot2)
+#PC1 vs PC2
+ggplot(gallagher_metadata, aes(x = PC1, y = PC2, color = biological_group)) + geom_point(size = 4) + xlab(paste("PC1 -", pc_variance_summary$importance["Proportion of Variance", "PC1"] * 100, "%", sep = "")) + ylab(paste("PC2 -", pc_variance_summary$importance["Proportion of Variance", "PC2"] * 100, "%", sep = "")) + theme_minimal()
+#issue with PC1
+
+#PC2 vs PC3
+ggplot(gallagher_metadata, aes(x = PC2, y = PC3, color = biological_group)) + geom_point(size = 4) + xlab(paste("PC2 -", pc_variance_summary$importance["Proportion of Variance", "PC2"] * 100, "%", sep = "")) + ylab(paste("PC3 -", pc_variance_summary$importance["Proportion of Variance", "PC3"] * 100, "%", sep = "")) + theme_minimal()
+
+#issue is the replicate
+ggplot(gallagher_metadata, aes(x = PC1, y = PC2, color = factor(replicate))) + geom_point(size = 4) + xlab(paste("PC1 -", pc_variance_summary$importance["Proportion of Variance", "PC1"] * 100, "%", sep = "")) + ylab(paste("PC2 -", pc_variance_summary$importance["Proportion of Variance", "PC2"] * 100, "%", sep = "")) + theme_minimal()
+
+#maybe ribosomal bases also contributes a little. not as clearly as replicate though.
+ggplot(gallagher_metadata, aes(x = PC1, y = PC2, color = PCT_RIBOSOMAL_BASES)) + geom_point(size = 4) + xlab(paste("PC1 -", pc_variance_summary$importance["Proportion of Variance", "PC1"] * 100, "%", sep = "")) + ylab(paste("PC2 -", pc_variance_summary$importance["Proportion of Variance", "PC2"] * 100, "%", sep = "")) + theme_minimal()
+
+```
+
+#   Add replicate and PCT_RIBOSOMAL_BASES into DESeq2 data object
+    *Make sure categorical variables are factors
+```{r}
+deObj$replicate <- factor(deObj$replicate)
+deObj@design <- ~factor(replicate) + PCT_RIBOSOMAL_BASES + biological_group
+
+#update DESeq2 data object
+deObj <- DESeq2::DESeq(deObj)
+
+#-----
+#NOTE: normalized counts matrix has not changed. covariate analysis is not factored into that!
+#do NOT run DE analysis on the normalized counts matrix if I needed to alter the covariate analysis!
+#-----
+
+
+```
+
+
+#   Visualize covariate regression
+    Limma NOT for DE analysis!
+```{r}
+vst_de_obj <- DESeq2::vst(deObj, blind=FALSE)
+vst_matrix <- assay(vst_de_obj)
+
+model_matrix1 <- model.matrix(~biological_group, colData(vst_de_obj))
+
+vst_matrix <- limma::removeBatchEffect(vst_matrix, batch=vst_de_obj$replicate,covariates=vst_de_obj$PCT_RIBOSOMAL_BASES, design=model_matrix1)
+assay(vst_de_obj) <- vst_matrix
+
+#looks good
+plotPCA(vst_de_obj, intgroup = c("biological_group"))
+plotPCA(vst_de_obj, intgroup = c("replicate"))
+
+#covariates factored in were replicate and PCT_RIBOSOMAL_BASES
+#didn't need ribosomal bases, but wanted to make sure the code worked out for my own sake
+```
+
+#   Differential gene expression analysis
+```{r}
+results1 <- DESeq2::results(deObj, contrast = c("biological_group","30_min_N4_PRN-694","30_min_N4"))
+results1
+
+prn_rel_30_min_n4_df <- as.data.frame(results1)
+write.csv(x=prn_rel_30_min_n4_df, file="drug_vs_untreated_N4_30min.csv", quote = F, row.names = T)
+```
+
+
+#   save progress
+```{r}
+#initial differential expression done between simulated control and treated groups
+#save data objects so we don't need to redo the analysis
+
+save(list = c("gallagher_metadata", "deObj", "geneCounts", "pcs", "normCountsDF"), file = "bulk_rnaseq_exp_gallagher2021.Rdat")
 ```

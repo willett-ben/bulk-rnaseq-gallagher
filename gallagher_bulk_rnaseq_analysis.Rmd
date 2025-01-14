@@ -451,6 +451,51 @@ dotplot(outputH_down, showCategory = 7, x="GeneRatio", color = "p.adjust", title
 
 ```
 
+#   C7 pathway analysis
+```{r}
+msigC7_mouse <- msigdbr(species = "Mus musculus", category = "C7") %>% dplyr::select(gs_name, gene_symbol)
+
+outputC7_up <- enricher(gene = upGenes, TERM2GENE = msigC7_mouse)
+outputC7_down <- enricher(gene = downGenes, TERM2GENE = msigC7_mouse)
+
+C7_results_up <- outputC7_up@result
+C7_results_down <- outputC7_down@result
+
+dotplot(outputC7_up, showCategory = 10, x="GeneRatio", color = "p.adjust", title="up")
+
+dotplot(outputC7_down, showCategory = 15, x="GeneRatio", color = "p.adjust", title="new", label_format = 40, font.size = 10)
+
+Tcell_pathways_up <- C7_results_up[grepl("CD8_TCELL", C7_results_up$ID),]
+dotplot(Tcell_pathways_up, showCategory = 10, x="GeneRatio", color = "p.adjust", title="cd8 Tcell-up")
+
+#this works. I want to substitute these three selected pathways for all "Tcell" pathways that I subsetted earlier
+dotplot(outputC7_up, showCategory = c("GSE27786_CD8_TCELL_VS_MONO_MAC_UP","GSE3039_CD4_TCELL_VS_ALPHAALPHA_CD8_TCELL_DN","GSE33424_CD161_INT_VS_NEG_CD8_TCELL_UP"), x="GeneRatio", color = "p.adjust", title="cd8 Tcell-up")
+
+dotplot(outputC7_up, showCategory = test_Tcell$ID, x="GeneRatio", color = "p.adjust", title="cd8 Tcell-up")
+
+dotplot(outputC7_up, showCategory = Tcell_pathways_up$ID, x="GeneRatio", color = "p.adjust", title="cd8 Tcell-up")
+
+#I'm not sure why dotplot only showed 5 entries. Tcell_pathways_up$ID is a list of ~42 or something like that
+#either way I subsetted the C7_results_up into T cell specific pathways that have previously been published.
+#Not informative in this study persay, but this would be how I approach this type of analysis in the future:
+#first subsetting the different C7 pathways into ones that are relevant for the cell type of interest.
+
+```
+
+
+
+#   save progress
+```{r}
+```
+
+
+
+#   save progress
+```{r}
+```
+
+
+
 #   save progress
 ```{r}
 ```

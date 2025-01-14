@@ -1,0 +1,9 @@
+#run fastqc on the raw fastq files
+fastqcr::fastqc(fq.dir = "~/data/bulk_RNA_seq/fastq_files/raw",
+                qc.dir = "/home/willettb/bulk-rnaseq-gallagher/fastq_raw_qc",
+                threads = 1,
+                fastqc.path = "~/software/FastQC/fastqc")
+
+#multiqc to check qc data
+system(command = 'multiqc /home/willettb/bulk-rnaseq-gallagher/fastq_raw_qc --filename *fastqc.html --outdir /home/willettb/bulk-rnaseq-gallagher')
+

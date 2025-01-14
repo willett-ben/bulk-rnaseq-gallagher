@@ -6,3 +6,17 @@ After I finished all of the analysis I figured out the issue with R studio on th
 That is why the whole analysis comes in as 1 commit.
 
 Not that big of a deal for intro analysis like this, but would be a bigger deal for a more in-depth analysis.
+
+
+
+Analysis included in this code
+Processing and QC for samples in groups(4):
+0   min unstimulated
+30  min unstimulated
+30  min N4 stimulation
+30  min N4 stimulation + PRN-694
+
+Analysis includes:
+volcano plots
+heatmaps
+overrepresentation analysis for hallmark genes and C7 immunological genesets

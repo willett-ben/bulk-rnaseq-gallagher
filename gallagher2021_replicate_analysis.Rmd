@@ -4,7 +4,17 @@ output: html_notebook
         replicating some data analysis from gallagher et al 2021
 ---
 
-
+#   Libraries
+```{r}
+library(DESeq2)
+library(limma)
+library(ggplot2)
+library(ggrepel)
+library(pheatmap)
+library(msigdbr)
+library(org.Mm.eg.db)
+library(clusterProfiler)
+```
 
 #   QC: FastQC and MultiQC
 ```{r}
@@ -266,8 +276,8 @@ summary(geneCounts)
 dim(geneCounts)
 
 #gene filtering
-#using 15 reads across all samples
-keep <- rowSums(geneCounts) >= 15
+#using 100 reads across all samples
+keep <- rowSums(geneCounts) >= 100
 
 filteredGeneCounts <- geneCounts[keep,]
 dim(filteredGeneCounts)
@@ -276,6 +286,7 @@ dim(filteredGeneCounts)
 ```
 
 #   generate scaling factor for DE analysis via DEseq2
+    replicate needs to be included in model!
 ```{r}
 library(DESeq2)
 library(limma)
@@ -378,7 +389,22 @@ deResults <- read.csv(file = '30min_n4_prn_vs_30min_n4.csv', header = TRUE, row.
 deResults$negLog10FDR <- (-1)*log10(deResults$padj)
 deResults$gene <- rownames(deResults)
 
-ggplot(deResults, aes(x = log2FoldChange, y = negLog10FDR)) + geom_point() + geom_vline(xintercept=c(-1,1), col="darkred") + xlim(-5,5) + geom_hline(yintercept=1, col = "darkred") + theme_minimal() + geom_text_repel(data=subset(deResults, padj <0.05), aes (label = gene), max.overlaps = 15)
+down_list = c("Nfkbia", "Nfkbiz", "Tnfaip3", "Myc", "Nfkbid", "Fosb", "Klf10", "Fosl1", "Fos")
+up_list = c("Egr1", "Egr2", "Egr3", "Nr4a1", "Nr4a2", "Ier2", "Tnf", "Cd69")
+
+
+deResults$down_label <- ifelse(deResults$gene %in% c("Nfkbia", "Nfkbiz", "Tnfaip3", "Myc", "Nfkbid", "Fosb", "Klf10", "Fosl1", "Fos"), TRUE, FALSE)
+
+# results$genelabels <- ifelse(results$Gene %in% c("IL23A", "IL1A","IL6", "CD80","CD86","NFKB","BAFT2"), 
+#                              as.character(results$Gene), NA)
+
+ggplot(deResults, aes(x = log2FoldChange, y = negLog10FDR)) + 
+  geom_point(color = "darkgray") +
+  geom_vline(xintercept=-1, linetype = "dashed") + xlim(-2.5,1.1) + ylim(-1,25)+
+  geom_hline(yintercept=1, col = "black", linetype = "dashed") + 
+  geom_point(data = deResults %>% filter(negLog10FDR > 1 & log2FoldChange <(-1)), color = "darkred") +
+  theme_minimal() + 
+  ylab("-Log10FDR")
 ```
 
 
@@ -462,7 +488,16 @@ dotplot(outputC7_up, showCategory = Tcell_pathways_up$ID, x="GeneRatio", color =
 
 ```
 
+
+
+
+
+
 #   
 ```{r}
 
+sum(geneCounts[rownames(geneCounts) == "Klhl32",])
+sum(geneCounts[rownames(geneCounts) == "Myc",])
+dim(geneCounts)
+sum(normCountsDF[rownames(normCountsDF) =="Klhl32",])
 ```

@@ -383,31 +383,80 @@ write.csv(as.data.frame(prn_rel_30min_n4), "30min_n4_prn_vs_30min_n4.csv", quote
 ```
 
 ##  volcano plot
+    Note: I don't like that their baseline control in the paper is the drug treated        group..? I have the drug treated group as the numerator in the DESeq2::results()       command and I get a mirror of the published data.
 ```{r}
 library(ggrepel)
+library(tidyverse)
+library(scales)
 deResults <- read.csv(file = '30min_n4_prn_vs_30min_n4.csv', header = TRUE, row.names = 1)
 deResults$negLog10FDR <- (-1)*log10(deResults$padj)
 deResults$gene <- rownames(deResults)
+
+#identify up/down regulated genes when PRN-694 is added
+deResults <- deResults %>%
+  mutate(gene_type = case_when(log2FoldChange < (-1) & negLog10FDR > 1 ~ "down",
+                               log2FoldChange > 1 & negLog10FDR > 1 ~ "up",
+                               TRUE ~ "ns"))
+
+#no upregulated genes: expected
+#only a few (18) downregulated genes: expected
+deResults %>% count(gene_type)
+
+deResults %>%
+  distinct(gene_type) %>%
+  pull()
+
+
 
 down_list = c("Nfkbia", "Nfkbiz", "Tnfaip3", "Myc", "Nfkbid", "Fosb", "Klf10", "Fosl1", "Fos")
 up_list = c("Egr1", "Egr2", "Egr3", "Nr4a1", "Nr4a2", "Ier2", "Tnf", "Cd69")
 
 
-deResults$down_label <- ifelse(deResults$gene %in% c("Nfkbia", "Nfkbiz", "Tnfaip3", "Myc", "Nfkbid", "Fosb", "Klf10", "Fosl1", "Fos"), TRUE, FALSE)
+deResults$Genes_to_label <- ifelse(deResults$gene %in% c("Nfkbia", "Nfkbiz", "Tnfaip3", "Myc", "Nfkbid", "Fosb", "Klf10", "Fosl1", "Fos", "Egr1", "Egr2", "Egr3", "Nr4a1", "Nr4a2", "Ier2", "Tnf", "Cd69"), TRUE, FALSE)
 
-# results$genelabels <- ifelse(results$Gene %in% c("IL23A", "IL1A","IL6", "CD80","CD86","NFKB","BAFT2"), 
-#                              as.character(results$Gene), NA)
-
-ggplot(deResults, aes(x = log2FoldChange, y = negLog10FDR)) + 
-  geom_point(color = "darkgray") +
-  geom_vline(xintercept=-1, linetype = "dashed") + xlim(-2.5,1.1) + ylim(-1,25)+
-  geom_hline(yintercept=1, col = "black", linetype = "dashed") + 
-  geom_point(data = deResults %>% filter(negLog10FDR > 1 & log2FoldChange <(-1)), color = "darkred") +
-  theme_minimal() + 
-  ylab("-Log10FDR")
+  
 ```
 
+#Gallagher Fig 4A
+```{r}
 
+ggplot(deResults, aes(x = log2FoldChange,
+             y = negLog10FDR, label = gene)) + 
+  geom_point(color = case_when(deResults$log2FoldChange < (-1) & deResults$negLog10FDR
+                               >1 ~ "darkred",TRUE ~ "gray60"),
+             size = 1.5, alpha = 0.8) +
+  geom_label_repel(data = subset(deResults, down_label == TRUE), 
+                   fill = "gray95",
+                   color = "darkred",
+                   nudge_x = (-0.2),
+                   nudge_y = 0.1) +
+  geom_label_repel(data = subset(deResults, up_label == TRUE),
+                   max.overlaps = 1000,
+                   fill = "gray95",
+                   color = "gray15",
+                   nudge_x = 0.5,
+                   nudge_y = 0.7) +
+  geom_point(data = deResults[deResults$up_label == TRUE,], 
+             shape = 1,
+             size = 3) +
+    geom_point(data = deResults[deResults$down_label == TRUE,], 
+             shape = 1,
+             size = 3,
+             color = "darkred") +
+  geom_vline(xintercept=-1, linetype = "dashed") + xlim(-2.5,1.1) + ylim(-1,25)+
+  geom_hline(yintercept=1, col = "gray5", linetype = "dashed") + 
+  theme_minimal() + 
+  theme(panel.border = element_rect(color = "gray5", fill = NA, linewidth = 0.75))+
+  theme(legend.position = "none") +
+  annotate("text", x=0.5, y=20, label = "Untreated vs. PRN694\n N4 peptide", color = "gray5", size = 5) +
+  labs(y = expression(-Log[10]~FDR), x = expression(Log[2]~Fold~Change))
+
+ggsave(filename = "Gallagher_Fig4A.png", plot = last_plot())
+```
+
+  
+  
+  
 ##  Heatmap
 ```{r}
 library(pheatmap)
